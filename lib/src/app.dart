@@ -68,9 +68,9 @@ class MyApp extends StatelessWidget {
               builder: (BuildContext context) {
                 switch (routeSettings.name) {
                   case ChatView.routeName:
-                    return const ChatView();
+                    return ChatView();
                   default:
-                    return const ChatView();
+                    return ChatView();
                 }
               },
             );

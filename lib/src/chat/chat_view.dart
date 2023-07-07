@@ -4,35 +4,43 @@ import 'package:flutter/material.dart';
 import '../settings/settings_view.dart';
 
 /// Displays a list of SampleItems.
-class ChatView extends StatelessWidget {
-  const ChatView(
-      {Key? key,
-      this.items = const [
-        ChatMessage(content: "Hello there!", sender: MessageSender.atharo),
-        ChatMessage(content: "Can you remind me to do this thing?", sender: MessageSender.user),
-        ChatMessage(content: "No problem, consider it done.", sender: MessageSender.atharo),
-      ]})
-      : super(key: key);
 
+class ChatView extends StatefulWidget {
   static const routeName = '/';
-  final List<ChatMessage> items;
+
+  ChatView({Key? key}) : super(key: key);
+
+  @override
+  _ChatViewState createState() => _ChatViewState();
+}
+
+class _ChatViewState extends State<ChatView> {
+  List<ChatMessage> items = [
+    const ChatMessage(content: "Hello, how can I help you?", sender: MessageSender.atharo),
+    const ChatMessage(content: "I need help with my order.", sender: MessageSender.user),
+    const ChatMessage(content: "No problem, consider it done.", sender: MessageSender.atharo),
+  ];
+
+  late FocusNode focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    var inputController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to the settings page. If the user leaves and returns
-              // to the app after it has been killed while running in the
-              // background, the navigation stack is restored.
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
-          ),
-        ],
       ),
 
       // To work with lists that may contain a large number of items, it’s best
@@ -67,12 +75,45 @@ class ChatView extends StatelessWidget {
                         padding: EdgeInsets.all(16),
                         child: Text(
                           item.content,
-                          style: TextStyle(fontSize: 15, color: Colors.black),
+                          style: const TextStyle(fontSize: 15, color: Colors.black),
                         ),
                       ),
                     ));
               },
-            )
+            ),
+            Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                    padding: const EdgeInsets.all(14),
+                    height: 60,
+                    width: double.infinity,
+                    // color: Colors.white,
+                    child: Row(children: <Widget>[
+                      Expanded(
+                          child: TextField(
+                        controller: inputController,
+                        focusNode: focusNode,
+                        onSubmitted: (v) {
+                          setState(() {
+                            items.add(ChatMessage(content: inputController.text, sender: MessageSender.user));
+                            inputController.clear();
+                            focusNode.requestFocus();
+                          });
+                        },
+                        decoration: InputDecoration(
+                            hintText: "Write message...",
+                            border: InputBorder.none,
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    items.add(ChatMessage(content: inputController.text, sender: MessageSender.user));
+                                    inputController.clear();
+                                    focusNode.requestFocus();
+                                  });
+                                },
+                                icon: const Icon(Icons.send))),
+                      ))
+                    ])))
           ])),
     );
   }
